@@ -1,0 +1,93 @@
+# Create a menu-based Java application with the following options. 1.Add an Employee 2. Display All 3. Exit If option 1 is selected, the application should gather details of the employee like employee name, employee id, designation and salary and store it in a file. If option 2 is selected, the application should display all the employee details. If option 3 is selected the application should exit
+CODE:
+import java.util.Scanner;
+import java.io.*;
+class Employee {
+    private String id;
+    private String name;
+    private String designation;
+    private double salary;
+    public Employee(String id, String name, String designation, double salary) {
+        this.id = id;
+        this.name = name;
+        this.designation = designation;
+        this.salary = salary;
+    }
+    public String toFileString() {
+        return id + "," + name + "," + designation + "," + salary;
+    }
+    @Override
+    public String toString() {
+        return "Employee ID: " + id + ", Name: " + name + ", Designation: " + designation + ", Salary: " + salary;
+    }
+}
+public class EmployeeMenu {
+    private static final String FILE_NAME = "employees.txt";
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int choice;
+        while (true) {
+            System.out.println("Menu:");
+            System.out.println("1. Add an Employee");
+            System.out.println("2. Display All");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
+            if (choice == 1) {
+                System.out.print("Enter Employee ID: ");
+                String id = scanner.nextLine();
+                System.out.print("Enter Employee Name: ");
+                String name = scanner.nextLine();
+                System.out.print("Enter Designation: ");
+                String designation = scanner.nextLine();
+                System.out.print("Enter Salary: ");
+                double salary;
+                try {
+                    salary = Double.parseDouble(scanner.nextLine());
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid salary input.");
+                    continue;
+                }
+                Employee emp = new Employee(id, name, designation, salary);
+                try (FileWriter fw = new FileWriter(FILE_NAME, true);
+                     BufferedWriter bw = new BufferedWriter(fw);
+                     PrintWriter out = new PrintWriter(bw)) {
+                     
+                    out.println(emp.toFileString());
+                    System.out.println("Employee added successfully.");
+                } catch (IOException e) {
+                    System.out.println("An error occurred while writing to the file: " + e.getMessage());
+                }
+                
+            } else if (choice == 2) {
+                try (BufferedReader br = new BufferedReader(new FileReader(FILE_NAME))) {
+                    String line;
+                    System.out.println("Employee Details:");
+                    while ((line = br.readLine()) != null) {
+                        String[] details = line.split(",");
+                        if (details.length == 4) {
+                            System.out.println("Employee ID: " + details[0] + ", Name: " + details[1] +
+                                               ", Designation: " + details[2] + ", Salary: " + details[3]);
+                        }
+                    }
+                } catch (FileNotFoundException e) {
+                    System.out.println("No employee records found.");
+                } catch (IOException e) {
+                    System.out.println("An error occurred while reading the file: " + e.getMessage());
+                }
+                
+            } else if (choice == 3) {
+                System.out.println("Exiting the application.");
+                break;
+            } else {
+                System.out.println("Invalid option. Please choose again.");
+            }
+        }
+        scanner.close();
+    }
+}
